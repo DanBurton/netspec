@@ -3,21 +3,27 @@ module Network.NetSpec (
   , SpecState (..)  
   , serve
   , send
+  , broadcast
   , recv
-  , flush
   , debugPrint
   , module N
   , module I
+  , module BS
   ) where
 
 import qualified System.IO as I (Handle)
 import qualified Network as N (PortID (..))
+import qualified Data.ByteString.Char8 as BS (ByteString)
+
+import qualified Data.ByteString.Char8 as C8
+import Data.ByteString.Char8 (ByteString)
 
 import System.IO
 import Network
-import Control.Applicative((<$>))
+import Control.Applicative ((<$>))
 import Control.Exception
 import Data.Maybe (fromMaybe)
+
 
 fst' :: (a,b,c) -> a
 fst' (a,_,_) = a
@@ -38,17 +44,20 @@ data NetSpec s = NetSpec
   }
 
 
-flush :: [Handle] -> IO ()
-flush = mapM_ hFlush
+send, (!) :: Handle -> ByteString -> IO ()
+send h str = C8.hPutStrLn h str >> hFlush h
 
-send :: Handle -> String -> IO ()
-send = hPutStrLn
+(!) = send
 
-recv :: Handle -> IO String
-recv = hGetLine
+broadcast :: [Handle] -> ByteString -> IO ()
+broadcast hs str = mapM_ (! str) hs
+
+recv :: Handle -> IO ByteString
+recv = C8.hGetLine
 
 debugPrint :: Maybe (String -> IO ())
 debugPrint = Just (hPutStrLn stderr)
+
 
 serve :: NetSpec s -> IO ()
 serve spec = withSocketsDo $ bracket a c b
