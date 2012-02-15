@@ -5,7 +5,10 @@ module Network.NetSpec (
   , (!)
   , broadcast
   , receive
-  , debugPrint
+  , continue
+  , continue_
+  , stop
+  , stop_
   , module N
   , module I
   , module BS
@@ -33,20 +36,33 @@ fst' :: (a,b,c) -> a
 fst' (a,_,_) = a
 
 
-data SpecState s = Continue s | End s
+data SpecState s = Continue s | Stop s
+
+continue :: Monad m => s -> m (SpecState s)
+continue = return . Continue
+
+continue_ :: Monad m => m (SpecState ())
+continue_ = continue ()
+
+stop :: Monad m => s -> m (SpecState s)
+stop = return . Stop
+
+stop_ :: Monad m => m (SpecState ())
+stop_ = stop ()
 
 instance Functor SpecState where
   fmap f (Continue s) = Continue $ f s
-  fmap f (End s) = End $ f s
+  fmap f (Stop s) = Stop $ f s
 
 data NetSpec t s = NetSpec
   { _ports  :: t PortID
   , _begin  :: t Handle -> IO s
   , _loop   :: t Handle -> s -> IO (SpecState s)
   , _end    :: t Handle -> s -> IO ()
-  , _debug  :: Maybe (String -> IO ())
   }
 
+
+infix 2 !
 
 (!) :: Handle -> ByteString -> IO ()
 h ! str = C8.hPutStrLn h str >> hFlush h
@@ -57,38 +73,23 @@ broadcast hs str = F.mapM_ (! str) hs
 receive :: Handle -> IO ByteString
 receive = C8.hGetLine
 
-debugPrint :: Maybe (String -> IO ())
-debugPrint = Just (hPutStrLn stderr)
-
 
 serve :: Traversable t => NetSpec t s -> IO ()
 serve spec = withSocketsDo $ bracket a c b
   where
     a = do
-      d $ "Listening on ports: " ++
-        (unwords . F.toList $ fmap (\(PortNumber n) -> show n) (_ports spec))
       ss <- T.mapM listenOn $ _ports spec
-      d "Accepting on socks"
       hs <- fmap fst' <$> T.mapM accept ss
       return (ss, hs)
     b (_, hs) = do
-      d "Ready to begin"
       s <- _begin spec hs
-      d "Begun"
       runSpec hs s
-      d "Ended"
     c (ss, hs) = do
       F.mapM_ hClose hs
-      d "Handles closed"
       F.mapM_ sClose ss
-      d "Sockets closed"
 
     runSpec hs s = do
-      putStrLn "Ready to loop"
       res <- _loop spec hs s
-      putStrLn "Looped"
       case res of
         Continue s' -> runSpec hs s'
-        End s'      -> _end spec hs s'
-    
-    d = fromMaybe (\_ -> return ()) (_debug spec)
+        Stop s'     -> _end spec hs s'

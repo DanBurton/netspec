@@ -13,10 +13,7 @@ main = serve NetSpec {
   , _loop = \[inHandle, outHandle] () -> do
        line <- receive inHandle
        case line of
-         "bye\r" -> return $ End ()
-         _       -> do
-           outHandle ! line
-           return $ Continue ()
+         "bye\r" -> stop_
+         _       -> outHandle ! line >> continue_
   , _end = \hs () -> broadcast hs "That's all folks."
-  , _debug = debugPrint
   }
