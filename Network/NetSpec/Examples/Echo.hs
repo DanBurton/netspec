@@ -17,7 +17,6 @@ main = serve NetSpec {
          _       -> do
            outHandle ! line
            return $ Continue ()
-  , _end = \hs () -> do
-       broadcast hs "That's all folks."
+  , _end = \hs () -> broadcast hs "That's all folks."
   , _debug = debugPrint
   }
