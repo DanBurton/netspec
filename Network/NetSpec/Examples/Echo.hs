@@ -15,5 +15,5 @@ main = serve NetSpec {
        case line of
          "bye\r" -> stop_
          _       -> outHandle ! line >> continue_
-  , _end = \hs () -> broadcast hs "That's all folks."
+  , _end = \hs () -> hs ! "That's all folks."
   }

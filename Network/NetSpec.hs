@@ -1,8 +1,11 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Network.NetSpec (
     NetSpec (..)
   , SpecState (..)  
   , serve
   , (!)
+  , send
   , broadcast
   , receive
   , continue
@@ -24,12 +27,12 @@ import Data.ByteString.Char8 (ByteString)
 import qualified Data.Traversable as T
 import qualified Data.Foldable as F
 import Data.Traversable (Traversable)
+import Data.Foldable (Foldable)
 
 import System.IO
 import Network
 import Control.Applicative ((<$>))
 import Control.Exception
-import Data.Maybe (fromMaybe)
 
 
 fst' :: (a,b,c) -> a
@@ -64,10 +67,19 @@ data NetSpec t s = NetSpec
 
 infix 2 !
 
-(!) :: Handle -> ByteString -> IO ()
-h ! str = C8.hPutStrLn h str >> hFlush h
+class CanSend h where
+  (!) :: h -> ByteString -> IO ()
 
-broadcast :: Traversable t => t Handle -> ByteString -> IO ()
+instance CanSend Handle where
+  (!) = send
+
+send :: Handle -> ByteString -> IO ()
+send h str = C8.hPutStrLn h str >> hFlush h
+
+instance (Foldable f) => CanSend (f Handle) where
+  (!) = broadcast
+
+broadcast :: Foldable f => f Handle -> ByteString -> IO ()
 broadcast hs str = F.mapM_ (! str) hs
 
 receive :: Handle -> IO ByteString
