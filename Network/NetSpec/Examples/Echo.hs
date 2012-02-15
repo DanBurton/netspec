@@ -8,16 +8,16 @@ main :: IO ()
 main = serve NetSpec {
     _ports = [PortNumber 5001, PortNumber 5002]
   , _begin = \[inHandle, outHandle] -> do
-       send inHandle "Begin sending your message. Say \"bye\" to quit."
-       send outHandle "Prepare to receive messages."
-  , _loop = \() [inHandle, outHandle] -> do
-       line <- recv inHandle
+       inHandle ! "Begin sending your message. Say \"bye\" to quit."
+       outHandle ! "Prepare to receive messages."
+  , _loop = \[inHandle, outHandle] () -> do
+       line <- receive inHandle
        case line of
          "bye\r" -> return $ End ()
          _       -> do
-           send outHandle line
-           return (Continue ())
-  , _end = \() hs -> do
+           outHandle ! line
+           return $ Continue ()
+  , _end = \hs () -> do
        broadcast hs "That's all folks."
   , _debug = debugPrint
   }

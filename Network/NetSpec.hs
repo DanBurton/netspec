@@ -2,9 +2,9 @@ module Network.NetSpec (
     NetSpec (..)
   , SpecState (..)  
   , serve
-  , send
+  , (!)
   , broadcast
-  , recv
+  , receive
   , debugPrint
   , module N
   , module I
@@ -17,6 +17,10 @@ import qualified Data.ByteString.Char8 as BS (ByteString)
 
 import qualified Data.ByteString.Char8 as C8
 import Data.ByteString.Char8 (ByteString)
+
+import qualified Data.Traversable as T
+import qualified Data.Foldable as F
+import Data.Traversable (Traversable)
 
 import System.IO
 import Network
@@ -35,58 +39,56 @@ instance Functor SpecState where
   fmap f (Continue s) = Continue $ f s
   fmap f (End s) = End $ f s
 
-data NetSpec s = NetSpec
-  { _ports  :: [PortID]
-  , _begin  :: [Handle] -> IO s
-  , _loop   :: s -> [Handle] -> IO (SpecState s)
-  , _end    :: s -> [Handle] -> IO ()
+data NetSpec t s = NetSpec
+  { _ports  :: t PortID
+  , _begin  :: t Handle -> IO s
+  , _loop   :: t Handle -> s -> IO (SpecState s)
+  , _end    :: t Handle -> s -> IO ()
   , _debug  :: Maybe (String -> IO ())
   }
 
 
-send, (!) :: Handle -> ByteString -> IO ()
-send h str = C8.hPutStrLn h str >> hFlush h
+(!) :: Handle -> ByteString -> IO ()
+h ! str = C8.hPutStrLn h str >> hFlush h
 
-(!) = send
+broadcast :: Traversable t => t Handle -> ByteString -> IO ()
+broadcast hs str = F.mapM_ (! str) hs
 
-broadcast :: [Handle] -> ByteString -> IO ()
-broadcast hs str = mapM_ (! str) hs
-
-recv :: Handle -> IO ByteString
-recv = C8.hGetLine
+receive :: Handle -> IO ByteString
+receive = C8.hGetLine
 
 debugPrint :: Maybe (String -> IO ())
 debugPrint = Just (hPutStrLn stderr)
 
 
-serve :: NetSpec s -> IO ()
+serve :: Traversable t => NetSpec t s -> IO ()
 serve spec = withSocketsDo $ bracket a c b
   where
     a = do
       d $ "Listening on ports: " ++
-        unwords (map (\(PortNumber n) -> show n) (_ports spec))
-      ss <- mapM listenOn $ _ports spec
+        (unwords . F.toList $ fmap (\(PortNumber n) -> show n) (_ports spec))
+      ss <- T.mapM listenOn $ _ports spec
       d "Accepting on socks"
-      hs <- map fst' <$> mapM accept ss
+      hs <- fmap fst' <$> T.mapM accept ss
       return (ss, hs)
     b (_, hs) = do
       d "Ready to begin"
       s <- _begin spec hs
       d "Begun"
-      runSpec s hs
+      runSpec hs s
       d "Ended"
     c (ss, hs) = do
-      mapM_ hClose hs
+      F.mapM_ hClose hs
       d "Handles closed"
-      mapM_ sClose ss
+      F.mapM_ sClose ss
       d "Sockets closed"
 
-    runSpec s hs = do
+    runSpec hs s = do
       putStrLn "Ready to loop"
-      res <- _loop spec s hs
+      res <- _loop spec hs s
       putStrLn "Looped"
       case res of
-        Continue s' -> runSpec s' hs
-        End s'      -> _end spec s' hs
+        Continue s' -> runSpec hs s'
+        End s'      -> _end spec hs s'
     
     d = fromMaybe (\_ -> return ()) (_debug spec)
