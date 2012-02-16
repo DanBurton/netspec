@@ -35,7 +35,7 @@ You select whether you are a server or a client like so:
 
     import Network.NetSpec.Server
 
-      -- or
+      -- or --
 
     import Network.NetSpec.Client
 

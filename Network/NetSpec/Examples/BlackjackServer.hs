@@ -1,57 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
+module Network.NetSpec.Examples.BlackjackServer where
 
-module Network.NetSpec.Examples.Blackjack where
+import Network.NetSpec.Examples.BlackjackData
 
 import Control.Applicative ((<$>))
 import Control.Monad.State.Lazy
 import Network.NetSpec
 import Network.NetSpec.Json
 
-
-data Suit = Heart
-          | Spade
-          | Club 
-          | Diamond
-          deriving (Enum, Bounded)
-$(deriveJson id ''Suit)
-
-data FaceValue = Number Int
-               | King
-               | Queen
-               | Jack
-               | Ace
-$(deriveJson id ''FaceValue)
-
-instance Enum FaceValue where
-  toEnum 12 = Ace
-  toEnum 11 = King
-  toEnum 10 = Queen
-  toEnum 9 = Jack
-  toEnum (-1) = undefined
-  toEnum n = Number (n + 2)
-
-  fromEnum Ace = 12
-  fromEnum King = 11
-  fromEnum Queen = 10
-  fromEnum Jack = 9
-  fromEnum (Number n) = n - 2
-
-instance Bounded FaceValue where
-  minBound = Number 2
-  maxBound = Ace
-
-
-data Card = Card { suit :: Suit, faceValue :: FaceValue }
-$(deriveJson id ''Card)
-
-data BlackjackClientMessage = Hit | Stand
-$(deriveJson id ''BlackjackClientMessage)
-
-data BlackjackState = BJ
-  { hands :: [[Card]]
-  , deck :: [Card]
-  }
-$(deriveJson id ''BlackjackState)
 
 shuffle :: [a] -> IO [a]
 shuffle = return -- TODO
@@ -61,21 +16,14 @@ newGame = BJ [[],[]] <$> shuffle fullDeck
   where fullDeck = [Card s v | s <- [minBound .. maxBound]
                              , v <- [minBound .. maxBound]]
 
-
-data BlackjackServerMessage = YouAre Int
-                            | YourTurn [Card]
-                            | YouWin BlackjackState
-                            | YouLose BlackjackState
-                            | Error
-$(deriveJson id ''BlackjackServerMessage)
-
 deal :: Int -> State BlackjackState ()
 deal 0 = state $ \(BJ [h1,h2] (c:cs)) -> ((), BJ [c:h1, h2] cs)
 deal 1 = state $ \(BJ [h1,h2] (c:cs)) -> ((), BJ [h1, c:h2] cs)
-deal _ = state $ (\s -> ((), s))
+deal _ = state $ \s -> ((), s)
 
 bust :: BlackjackState -> Bool
-bust _ = True
+bust _ = True -- TODO
+
 
 bjSpec :: NetSpec [] BlackjackState
 bjSpec = ServerSpec {
