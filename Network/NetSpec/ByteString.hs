@@ -6,15 +6,18 @@ module Network.NetSpec.ByteString (
   , broadcast
   , receive
   , module I
-  , module BS
+  , module BSL
   ) where
 
 import System.IO as I (Handle)
-import Data.ByteString.Char8 as BS (ByteString)
+import Data.ByteString.Lazy as BSL (ByteString)
 
-import Data.ByteString.Char8 as C8
+import Control.Applicative ((<$>))
+import qualified Data.ByteString.Lazy as L
 import Data.Foldable as F
 import System.IO (hFlush)
+import Data.Binary.Get
+import Data.Binary.Put
 
 
 infix 2 !
@@ -29,10 +32,15 @@ instance (Foldable f) => CanSend (f Handle) where
   (!) = broadcast
 
 send :: Handle -> ByteString -> IO ()
-send h str = C8.hPutStrLn h str >> hFlush h
+send h str = L.hPut h str' >> hFlush h
+  where str' = runPut $ do
+          putWord64le . fromIntegral $ L.length str
+          putLazyByteString str
 
 broadcast :: Foldable f => f Handle -> ByteString -> IO ()
 broadcast hs str = F.mapM_ (! str) hs
 
 receive :: Handle -> IO ByteString
-receive = C8.hGetLine
+receive h = do
+  len <- fromIntegral . toInteger . runGet getWord64le <$> L.hGet h 8
+  L.hGet h len

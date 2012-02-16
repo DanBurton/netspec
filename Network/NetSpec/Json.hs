@@ -6,20 +6,19 @@ module Network.NetSpec.Json (
   , broadcast
   , receive
   , deriveJson
+  , module A
   , module I
   ) where
 
+import Data.Aeson as A (ToJSON, FromJSON)
 import System.IO as I (Handle)
 import Control.Applicative ((<$>))
-import Data.Aeson (encode, decode, ToJSON, FromJSON)
+import Data.Aeson (encode, decode)
 import Data.Aeson.TH (deriveJSON)
-import Data.Binary.Get
-import Data.Binary.Put
-import qualified Data.ByteString.Lazy as L
 import Data.Foldable as F (Foldable, mapM_)
 import Language.Haskell.TH (Name, Q, Dec)
-import System.IO (hFlush)
 
+import qualified Network.NetSpec.ByteString as B (send, receive)
 
 -- lowercased convenience function
 deriveJson :: (String -> String) -> Name -> Q [Dec]
@@ -37,17 +36,12 @@ instance Foldable f => CanSendJson (f Handle) where
 
 
 send :: ToJSON j => Handle -> j -> IO ()
-send h j = L.hPut h str' >> hFlush h
-  where str = encode j 
-        str' = runPut $ do
-          putWord64le . fromIntegral $ L.length str
-          putLazyByteString str
+send h j = B.send h (encode j)
 
 broadcast :: (ToJSON j, Foldable f) => f Handle -> j -> IO ()
 broadcast hs j = F.mapM_ (! j) hs
 
 
 receive :: FromJSON j => Handle -> IO (Maybe j)
-receive h = decode <$> do
-  len <- fromIntegral . toInteger . runGet getWord64le <$> L.hGet h 8
-  L.hGet h len
+receive h = decode <$> B.receive h
+
