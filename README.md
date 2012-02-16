@@ -9,10 +9,41 @@ Certain networking tasks have a very simple format:
 
 NetSpec provides a simple way to write such tasks.
 
-See the Echo example for how to use NetSpec for stateless situations.
-More examples soon to come.
+See the examples for how to use NetSpec.
+More examples soon to come. The general way to use NetSpec is to pick
+whether you are a client or a server, and which format you want to 
+deal with. You do this with imports.
 
-To run the example, open 3 terminals:
+To select which format you want to deal with, you have 3 options:
+ByteString.Char8, Text, or JSON. JSON is recommended; you can
+derive the necessary typeclass instances with `$(deriveJson id ''MyDataType)`
+
+    {-# LANGUAGE OverloadedStrings #-}
+    import Network.NetSpec.ByteString
+
+      -- or --
+
+    {-# LANGUAGE OverloadedStrings #-}
+    import Network.NetSpec.Text
+
+      -- or --
+
+    {-# LANGUAGE TemplateHaskell #-}
+    import Network.NetSpec.Json
+
+You select whether you are a server or a client like so:
+
+    import Network.NetSpec.Server
+
+      -- or
+
+    import Network.NetSpec.Client
+
+The difference between a server and a client is that
+the server listens and waits for connections, while the client
+immediately demands connections.
+
+To run the Echo example, open 3 terminals:
 
     0$ runhaskell Network/NetSpec/Examples/Echo.hs
     1$ telnet localhost 5001

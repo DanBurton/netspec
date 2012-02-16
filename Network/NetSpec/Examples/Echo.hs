@@ -3,9 +3,10 @@
 module Network.NetSpec.Examples.Echo where
 
 import Network.NetSpec
+import Network.NetSpec.ByteString
 
 main :: IO ()
-main = serve NetSpec {
+main = runSpec ServerSpec {
     _ports = [PortNumber 5001, PortNumber 5002]
   , _begin = \[inHandle, outHandle] -> do
        inHandle ! "Begin sending your message. Say \"bye\" to quit."
