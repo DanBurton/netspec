@@ -13,6 +13,7 @@ module Network.NetSpec.Json (
 import Data.Aeson as A (ToJSON, FromJSON)
 import System.IO as I (Handle)
 import Control.Applicative ((<$>))
+import Control.Monad.IO.Class
 import Data.Aeson (encode, decode)
 import Data.Aeson.TH (deriveJSON)
 import Data.Foldable as F (Foldable, mapM_)
@@ -26,7 +27,7 @@ deriveJson = deriveJSON
 
 
 class CanSendJson h where
-  (!) :: ToJSON j => h -> j -> IO ()
+  (!) :: MonadIO io => ToJSON j => h -> j -> io ()
 
 instance CanSendJson Handle where
   (!) = send
@@ -35,13 +36,12 @@ instance Foldable f => CanSendJson (f Handle) where
   (!) = broadcast
 
 
-send :: ToJSON j => Handle -> j -> IO ()
-send h j = B.send h (encode j)
+send :: MonadIO io => ToJSON j => Handle -> j -> io ()
+send h j = liftIO $ B.send h (encode j)
 
-broadcast :: (ToJSON j, Foldable f) => f Handle -> j -> IO ()
+broadcast :: MonadIO io => (ToJSON j, Foldable f) => f Handle -> j -> io ()
 broadcast hs j = F.mapM_ (! j) hs
 
 
-receive :: FromJSON j => Handle -> IO (Maybe j)
-receive h = decode <$> B.receive h
-
+receive :: (MonadIO io, FromJSON j) => Handle -> io (Maybe j)
+receive h = liftIO $ decode <$> B.receive h

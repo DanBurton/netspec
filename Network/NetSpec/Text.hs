@@ -12,6 +12,7 @@ module Network.NetSpec.Text (
 import System.IO as I (Handle)
 import Data.Text as X (Text)
 
+import Control.Monad.IO.Class
 import Data.Text.IO as T
 import Data.Foldable as F
 import System.IO (hFlush)
@@ -20,7 +21,7 @@ import System.IO (hFlush)
 infix 2 !
 
 class CanSend h where
-  (!) :: h -> Text -> IO ()
+  (!) :: MonadIO io => h -> Text -> io ()
 
 instance CanSend Handle where
   (!) = send
@@ -28,11 +29,11 @@ instance CanSend Handle where
 instance (Foldable f) => CanSend (f Handle) where
   (!) = broadcast
 
-send :: Handle -> Text -> IO ()
-send h str = T.hPutStrLn h str >> hFlush h
+send :: MonadIO io => Handle -> Text -> io ()
+send h str = liftIO $ T.hPutStrLn h str >> hFlush h
 
-broadcast :: Foldable f => f Handle -> Text -> IO ()
+broadcast :: MonadIO io => Foldable f => f Handle -> Text -> io ()
 broadcast hs str = F.mapM_ (! str) hs
 
-receive :: Handle -> IO Text
-receive = T.hGetLine
+receive :: MonadIO io => Handle -> io Text
+receive = liftIO . T.hGetLine
