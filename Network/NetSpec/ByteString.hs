@@ -7,13 +7,14 @@ module Network.NetSpec.ByteString (
   , receive
   , module I
   , module BSL
+  , module IO
   ) where
 
 import System.IO as I (Handle)
 import Data.ByteString.Lazy as BSL (ByteString)
+import Control.Monad.IO.Class as IO (MonadIO, liftIO)
 
 import Control.Applicative ((<$>))
-import Control.Monad.IO.Class
 import qualified Data.ByteString.Lazy as L
 import Data.Foldable as F
 import System.IO (hFlush)

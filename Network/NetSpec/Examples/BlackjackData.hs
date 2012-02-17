@@ -59,7 +59,7 @@ instance Show Card where
 
 type Hand = [Card]
 
-data BlackjackClientMessage = Hit | Stand
+data BlackjackClientMessage = Hit | Stand deriving (Show, Read)
 $(deriveJson id ''BlackjackClientMessage)
 
 data BlackjackState = BJ
@@ -68,9 +68,46 @@ data BlackjackState = BJ
   }
 $(deriveJson id ''BlackjackState)
 
-data BlackjackServerMessage = YouAre { yourIndex :: Int }
-                            | YourTurn { yourHand :: Hand }
-                            | YouWin { endState :: BlackjackState }
-                            | YouLose { gameState :: BlackjackState }
-                            | Error
-$(deriveJson id ''BlackjackServerMessage)
+data BJStartMsg = YouAre { yourIndex :: Int }
+$(deriveJson id ''BJStartMsg)
+
+data BJLoopMsg = YourTurn { yourHand :: Hand 
+                          , opponentCard :: Card
+                          , opponentNumCards :: Int
+                          }
+               | YouWin { endState :: BlackjackState }
+               | YouLose { endState :: BlackjackState }
+$(deriveJson id ''BJLoopMsg)
+
+loFVal :: FaceValue -> Int
+loFVal (Number n) = n
+loFVal Ace = 1
+loFVal _ = 10
+
+hiFVal :: FaceValue -> Int
+hiFVal (Number n) = n
+hiFVal Ace = 11
+hiFVal _ = 10
+
+loVal :: Hand -> Int
+loVal = sum . map (loFVal . faceValue)
+
+hiVal :: Hand -> Int
+hiVal = sum . map (hiFVal . faceValue)
+
+-- TODO: handle case of 2 or more aces.
+bestVal :: Hand -> Int
+bestVal h = if hi > 21 then lo else hi
+  where hi = hiVal h
+        lo = loVal h
+
+isBust :: Hand -> Bool
+isBust h = loVal h > 21
+
+isHit :: BlackjackClientMessage -> Bool
+isHit Hit = True
+isHit _ = False
+
+isStand :: BlackjackClientMessage -> Bool
+isStand Stand = True
+isStand _ = False

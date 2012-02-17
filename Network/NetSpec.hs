@@ -1,19 +1,32 @@
 module Network.NetSpec (
     NetSpec (..)
-  , SpecState (..)  
+  , SpecState (..)
+  
   , runSpec
   , continue
   , continue_
+  , continueIf
+  , continueIf'
   , stop
   , stop_
-  , module N
+  , stopIf
+  , stopIf'
+  
+  , (.:)
+  , stateT
   , module I
+  , module N
+  , module S
+  , module A
   ) where
 
 import System.IO as I (Handle)
 import Network as N (PortID (..))
+import Control.Monad.State as S
+  (StateT (..), execStateT, evalStateT, get, put)
+import Control.Applicative as A ((<$>))
 
-import Control.Applicative ((<$>))
+import Control.Monad
 import Control.Exception
 import Data.Traversable as T
 import Data.Foldable as F
@@ -22,6 +35,12 @@ import System.IO (hClose)
 
 fst' :: (a,b,c) -> a
 fst' (a,_,_) = a
+
+stateT :: Monad m => (s -> (a, s)) -> StateT s m a
+stateT = StateT . fmap return
+
+(.:) :: (a -> b) -> (c -> d -> a) -> c -> d -> b
+(.:) f g x y = f (g x y)
 
 
 data SpecState s = Continue s | Stop s
@@ -37,6 +56,22 @@ stop = return . Stop
 
 stop_ :: Monad m => m (SpecState ())
 stop_ = stop ()
+
+continueIf :: Monad m => (a -> s -> Bool) -> m (a,s) -> m (SpecState s)
+continueIf f ms = do
+  (a,s) <- ms
+  if f a s then continue s else stop s
+
+continueIf' :: Monad m => (s -> Bool) -> m s -> m (SpecState s)
+continueIf' f ms = continueIf (\() s -> f s) (liftM ((,) ()) ms)
+
+stopIf :: Monad m => (a -> s -> Bool) -> m (a,s) -> m (SpecState s)
+stopIf f ms = do
+  (a,s) <- ms
+  if f a s then stop s else continue s
+
+stopIf' :: Monad m => (s -> Bool) -> m s -> m (SpecState s)
+stopIf' f ms = stopIf (\() s -> f s) (liftM ((,) ()) ms)
 
 instance Functor SpecState where
   fmap f (Continue s) = Continue $ f s

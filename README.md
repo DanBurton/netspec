@@ -84,7 +84,7 @@ how nicely a NetSpec server and NetSpec client can communicate (with Text).
 To run the Blackjack example, open 3 terminals:
 
     0$ runhaskell Network/NetSpec/Examples/BlackjackServer.hs
-    1$ runhaskell Network/NetSpec/Examples/BlackjackClient.hs 5001
+    1$ runhaskell Network/NetSpec/Examples/BlackjackClient.hs 5001 bot
     2$ runhaskell Network/NetSpec/Examples/BlackjackClient.hs 5002
 
 The Blackjack example is a work in progress, and illustrates

@@ -7,12 +7,13 @@ module Network.NetSpec.Text (
   , receive
   , module I
   , module X
+  , module IO
   ) where
 
 import System.IO as I (Handle)
 import Data.Text as X (Text)
+import Control.Monad.IO.Class as IO (MonadIO, liftIO)
 
-import Control.Monad.IO.Class
 import Data.Text.IO as T
 import Data.Foldable as F
 import System.IO (hFlush)

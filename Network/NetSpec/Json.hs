@@ -8,12 +8,13 @@ module Network.NetSpec.Json (
   , deriveJson
   , module A
   , module I
+  , module IO
   ) where
 
 import Data.Aeson as A (ToJSON, FromJSON)
 import System.IO as I (Handle)
+import Control.Monad.IO.Class as IO (MonadIO, liftIO)
 import Control.Applicative ((<$>))
-import Control.Monad.IO.Class
 import Data.Aeson (encode, decode)
 import Data.Aeson.TH (deriveJSON)
 import Data.Foldable as F (Foldable, mapM_)
