@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Network.NetSpec.Json (
+module NetSpec.Json (
     (!)
   , send
   , broadcast
@@ -20,7 +20,7 @@ import Data.Aeson.TH (deriveJSON)
 import Data.Foldable as F (Foldable, mapM_)
 import Language.Haskell.TH (Name, Q, Dec)
 
-import qualified Network.NetSpec.ByteString as B (send, receive)
+import qualified NetSpec.ByteString as B (send, receive)
 
 -- lowercased convenience function
 deriveJson :: (String -> String) -> Name -> Q [Dec]

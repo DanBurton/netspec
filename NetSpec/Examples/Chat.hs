@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.NetSpec.Examples.Chat where
+module NetSpec.Examples.Chat where
 
-import Network.NetSpec
-import Network.NetSpec.Text
+import NetSpec
+import NetSpec.Text
 
 -- Notice the restrictions NetSpec places on how you can communicate.
 -- Working within NetSpec isn't well-suited for all situations;

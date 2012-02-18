@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Network.NetSpec.Text (
+module NetSpec.Text (
     (!)
   , send
   , broadcast

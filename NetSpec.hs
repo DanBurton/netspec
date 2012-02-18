@@ -1,4 +1,4 @@
-module Network.NetSpec (
+module NetSpec (
     NetSpec (..)
   , SpecState (..)
   

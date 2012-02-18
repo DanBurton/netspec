@@ -34,17 +34,17 @@ but at the same time tries to use a sensible implementation that
 can easily work with other programming languages and systems.
 
     {-# LANGUAGE OverloadedStrings #-}
-    import Network.NetSpec.ByteString
+    import NetSpec.ByteString
 
       -- or --
 
     {-# LANGUAGE OverloadedStrings #-}
-    import Network.NetSpec.Text
+    import NetSpec.Text
 
       -- or --
 
     {-# LANGUAGE TemplateHaskell #-}
-    import Network.NetSpec.Json
+    import NetSpec.Json
 
 You select whether you are a server or a client based on
 which kind of spec you run.
@@ -64,7 +64,7 @@ how to loop, and how to shut down.
 
 To run the Relay example, open 3 terminals:
 
-    0$ runhaskell Network/NetSpec/Examples/Relay.hs
+    0$ runhaskell NetSpec/Examples/Relay.hs
     1$ telnet localhost 5001
     2$ telnet localhost 5002
 
@@ -78,14 +78,16 @@ uses only `\n` as the end-of-message sentinel, so it is up to you to handle
 Contrast this with the Echo / Telnet example, which illustrates
 how nicely a NetSpec server and NetSpec client can communicate (with Text).
 
-    0$ runhaskell Network/NetSpec/Examples/Echo.hs
-    1$ runhaskell Network/NetSpec/Examples/Telnet.hs localhost 5001
+    0$ runhaskell NetSpec/Examples/Echo.hs
+    1$ runhaskell NetSpec/Examples/Telnet.hs localhost 5001
 
 To run the Blackjack example, open 3 terminals:
 
-    0$ runhaskell Network/NetSpec/Examples/BlackjackServer.hs
-    1$ runhaskell Network/NetSpec/Examples/BlackjackClient.hs 5001 bot
-    2$ runhaskell Network/NetSpec/Examples/BlackjackClient.hs 5002
+    0$ runhaskell NetSpec/Examples/BlackjackServer.hs
+    1$ runhaskell NetSpec/Examples/BlackjackClient.hs localhost 5001 bot
+    2$ runhaskell NetSpec/Examples/BlackjackClient.hs localhost 5002
 
-The Blackjack example is a work in progress, and illustrates
-a stateful server, mostly statless clients, and uses `JSON` messages.
+The Blackjack example illustrates
+a stateful server,
+mostly statless clients,
+and uses `JSON` messages.

@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Network.NetSpec.ByteString (
+module NetSpec.ByteString (
     (!)
   , send
   , broadcast

@@ -1,10 +1,12 @@
-module Network.NetSpec.Examples.BlackjackClient where
+module NetSpec.Examples.BlackjackClient where
 
-import Network.NetSpec.Examples.BlackjackData
-import Network.NetSpec
-import Network.NetSpec.Json
-import System.Environment (getArgs)
+import NetSpec.Examples.BlackjackData
+import NetSpec
+import NetSpec.Json
+
+import Control.Monad (void)
 import Data.List (intercalate)
+import System.Environment (getArgs)
 import Text.Printf (printf)
 
 readInt :: String -> Int
@@ -14,7 +16,7 @@ data ClientState = CS
   { myIndex :: Int }
 
 askAction :: Hand -> IO BlackjackClientMessage
-askAction h = putStrLn "Hit or Stand?" >> read <$> getLine
+askAction _ = putStrLn "Hit or Stand?" >> read <$> getLine
 
 botAction :: Hand -> IO BlackjackClientMessage
 botAction h
@@ -22,31 +24,35 @@ botAction h
   | loVal h > 14 = putStrLn "Stand" >> return Stand
   | otherwise    = putStrLn "Hit" >> return Hit
 
+resolution :: String -> ClientState -> BlackjackState -> IO ()
+resolution str (CS i) (BJ hs _) = printEnd hs i >> putStrLn str
+
 win :: ClientState -> BlackjackState -> IO ()
-win (CS i) (BJ hs _) = printEnd hs i >> putStrLn "You win"
+win = resolution "You win!"
 
 lose :: ClientState -> BlackjackState -> IO ()
-lose (CS i) (BJ hs _) = printEnd hs i >> putStrLn "You lose"
+lose = resolution "You lose!"
 
 printEnd :: [Hand] -> Int -> IO ()
 printEnd [h0,h1] i = let (you, opp) = if i == 0 then (h0,h1) else (h1,h0)
                      in do putStrLn $ replicate 40 '-'
-                           printf "You:  %s (%d)\n" (show you) (bestVal you)
-                           printf "Them: %s (%d)\n" (show opp) (bestVal opp)
+                           void $ printf "You:  %s (%d)\n" (show you) (bestVal you)
+                           void $ printf "Them: %s (%d)\n" (show opp) (bestVal opp)
+printEnd _ _ = error "Unexpected number of hands"
 
 displayTurn :: Hand -> Card -> Int -> IO ()
 displayTurn hand c n = do
-  printf "You: %s" (show hand)
+  void $ printf "You: %s" (show hand)
   putStrLn $ replicate 20 ' '
-  printf "Opponent: [%s,%s]\n" (show c) oHand
+  void $ printf "Opponent: [%s,%s]\n" (show c) oHand
   where oHand = intercalate "," $ replicate (pred n) "|??|"
 
 main :: IO ()
 main = do
-  (port:bot) <- map (fromIntegral . readInt) <$> getArgs
+  (host:port:bot) <- getArgs
   let chooseAction = if null bot then askAction else botAction
   runSpec ClientSpec
-    { _conns = [("localhost", PortNumber port)]
+    { _conns = [(host, PortNumber (fromIntegral $ readInt port))]
     , _begin = \[h] -> do
          Just m <- receive h
          case m of YouAre i -> return $ CS i

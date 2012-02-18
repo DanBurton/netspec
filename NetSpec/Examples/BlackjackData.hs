@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Network.NetSpec.Examples.BlackjackData where
+module NetSpec.Examples.BlackjackData where
 
-import Network.NetSpec.Json
+import NetSpec.Json
 
 
 data Suit = Heart

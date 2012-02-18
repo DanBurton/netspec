@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.NetSpec.Examples.Echo where
+module NetSpec.Examples.Echo where
 
-import Network.NetSpec
-import Network.NetSpec.Text
+import NetSpec
+import NetSpec.Text
 
 main :: IO ()
 main = runSpec ServerSpec

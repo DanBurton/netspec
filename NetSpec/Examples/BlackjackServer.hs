@@ -1,9 +1,9 @@
-module Network.NetSpec.Examples.BlackjackServer where
+module NetSpec.Examples.BlackjackServer where
 
-import Network.NetSpec.Examples.BlackjackData
+import NetSpec.Examples.BlackjackData
 
-import Network.NetSpec
-import Network.NetSpec.Json
+import NetSpec
+import NetSpec.Json
 import Control.Monad
 
 -- cabal install random-shuffle
@@ -31,6 +31,7 @@ whoWins (BJ [h0, h1] _) p0 p1
   | isBust h0               = (p1, p0)
   | bestVal h1 > bestVal h0 = (p1, p0)
   | otherwise               = (p0, p1)
+whoWins _ _ _ = error "Unexpected BlackjackState format"
 
 bjSpec :: NetSpec [] BlackjackState
 bjSpec = ServerSpec {

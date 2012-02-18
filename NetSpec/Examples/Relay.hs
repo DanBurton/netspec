@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.NetSpec.Examples.Relay where
+module NetSpec.Examples.Relay where
 
-import Network.NetSpec
-import Network.NetSpec.Text
+import NetSpec
+import NetSpec.Text
 
 main :: IO ()
 main = runSpec ServerSpec {
