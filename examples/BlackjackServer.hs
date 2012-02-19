@@ -1,6 +1,4 @@
-module NetSpec.Examples.BlackjackServer where
-
-import NetSpec.Examples.BlackjackData
+import BlackjackData
 
 import NetSpec
 import NetSpec.Json

@@ -38,11 +38,11 @@ import qualified NetSpec.ByteString as B (send, receive)
 -- Usage:
 -- 
 -- @
---{-\# LANGUAGE TemplateHaskell \#-}
---data Foo = Bar | Baz { quux :: Int }
---$(deriveJson id ''Foo)
+--  {-\# LANGUAGE TemplateHaskell \#-}
+--  data Foo = Bar | Baz { quux :: Int }
+--  $(deriveJson id ''Foo)
 -- @
---
+-- 
 -- Alteratively, you could write your own instances.
 deriveJson :: (String -> String) -> Name -> Q [Dec]
 deriveJson = deriveJSON

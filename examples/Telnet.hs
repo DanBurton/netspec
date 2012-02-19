@@ -1,7 +1,5 @@
 -- no need for OverloadedStrings
 
-module NetSpec.Examples.Telnet where
-
 import NetSpec
 import NetSpec.Text
 import System.Environment (getArgs)

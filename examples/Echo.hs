@@ -1,7 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module NetSpec.Examples.Echo where
-
 import NetSpec
 import NetSpec.Text
 

@@ -62,9 +62,13 @@ and immediately demands connections. However, other than this detail,
 servers and clients are specified the same: how to start up,
 how to loop, and how to shut down.
 
+The examples are found in the "examples" folder (surprise!)
+
+    $ cd examples
+
 To run the Relay example, open 3 terminals:
 
-    0$ runhaskell NetSpec/Examples/Relay.hs
+    0$ runhaskell Relay.hs
     1$ telnet localhost 5001
     2$ telnet localhost 5002
 
@@ -78,16 +82,24 @@ uses only `\n` as the end-of-message sentinel, so it is up to you to handle
 Contrast this with the Echo / Telnet example, which illustrates
 how nicely a NetSpec server and NetSpec client can communicate (with Text).
 
-    0$ runhaskell NetSpec/Examples/Echo.hs
-    1$ runhaskell NetSpec/Examples/Telnet.hs localhost 5001
+    0$ runhaskell Echo.hs
+    1$ runhaskell Telnet.hs localhost 5001
 
 To run the Blackjack example, open 3 terminals:
 
-    0$ runhaskell NetSpec/Examples/BlackjackServer.hs
-    1$ runhaskell NetSpec/Examples/BlackjackClient.hs localhost 5001 bot
-    2$ runhaskell NetSpec/Examples/BlackjackClient.hs localhost 5002
+    0$ runhaskell BlackjackServer.hs
+    1$ runhaskell BlackjackClient.hs localhost 5001 bot
+    2$ runhaskell BlackjackClient.hs localhost 5002
 
 The Blackjack example illustrates
 a stateful server,
 mostly statless clients,
 and uses `JSON` messages.
+It uses some of the StateT-related
+convenience functions exported by NetSpec.
+
+<hr />
+
+(c) 2012 Dan Burton
+
+danburton.email@gmail.com

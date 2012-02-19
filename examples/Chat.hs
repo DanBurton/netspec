@@ -1,7 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module NetSpec.Examples.Chat where
-
 import NetSpec
 import NetSpec.Text
 

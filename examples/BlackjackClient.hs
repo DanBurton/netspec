@@ -1,6 +1,5 @@
-module NetSpec.Examples.BlackjackClient where
+import BlackjackData
 
-import NetSpec.Examples.BlackjackData
 import NetSpec
 import NetSpec.Json
 

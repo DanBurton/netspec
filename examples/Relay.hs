@@ -1,7 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module NetSpec.Examples.Relay where
-
 import NetSpec
 import NetSpec.Text
 

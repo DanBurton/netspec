@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module NetSpec.Examples.BlackjackData where
+module BlackjackData where
 
 import NetSpec.Json
 
