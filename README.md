@@ -74,6 +74,15 @@ To run them, you'll need to install the NetSpec library.
 
     $ cd examples
 
+Or, assuming you have the Haskell Platform and the aeson library installed,
+you don't actually have to install NetSpec to run the examples.
+Just use the `-i` option to tell it where the NetSpec source is.
+
+    $ pwd
+    blah/blah/netspec/examples
+
+    $ runhaskell -i.:../src SomeExample.hs
+
 To run the Relay example, open 3 terminals:
 
     0$ runhaskell Relay.hs
@@ -93,7 +102,11 @@ how nicely a NetSpec server and NetSpec client can communicate (with Text).
     0$ runhaskell Echo.hs
     1$ runhaskell Telnet.hs localhost 5001
 
-To run the Blackjack example, open 3 terminals:
+To run the Blackjack example, you'll need the `random-shuffle` package
+
+    $ cabal install random-shuffle
+
+Open 3 terminals:
 
     0$ runhaskell BlackjackServer.hs
     1$ runhaskell BlackjackClient.hs localhost 5001 bot
