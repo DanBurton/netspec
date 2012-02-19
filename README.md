@@ -62,7 +62,15 @@ and immediately demands connections. However, other than this detail,
 servers and clients are specified the same: how to start up,
 how to loop, and how to shut down.
 
-The examples are found in the "examples" folder (surprise!)
+The examples are found in the "examples" folder (surprise!).
+To run them, you'll need to install the NetSpec library.
+
+    $ pwd
+    blah/blah/netspec
+
+    $ cabal install
+    blah blah
+    Registering netspec-0.1.0.0...
 
     $ cd examples
 
