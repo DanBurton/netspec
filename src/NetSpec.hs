@@ -1,9 +1,15 @@
 -- | Simplify static Networking tasks.
 module NetSpec (
+  -- * Types and Constructors
     NetSpec (..)
   , SpecState (..)
   
+  -- * Functions
+  
+  -- ** Running a NetSpec
   , runSpec
+  
+  -- ** Continue and Stop Combinators
   , continue
   , continue_
   , continueIf
@@ -13,12 +19,21 @@ module NetSpec (
   , stopIf
   , stopIf'
   
+  -- * Convenience
+  
+  -- ** Composition
   , (.:)
-  , stateT
+
+  -- ** IO and Networking
   , module I
   , module N
-  , module S
+  
+  -- ** Functors
   , module A
+  
+  -- ** State
+  , module S
+  , stateT
   ) where
 
 import System.IO as I (Handle)
@@ -37,16 +52,16 @@ import System.IO (hClose)
 fst' :: (a,b,c) -> a
 fst' (a,_,_) = a
 
--- | Lift a state function into a 'StateT' monad stack
+-- | Lift a state function into a 'S.StateT' monad stack
 stateT :: Monad m => (s -> (a, s)) -> StateT s m a
 stateT = StateT . fmap return
 
--- | Compose two functions, giving 2 inputs to the "first" one.
--- If 'h = f .: g' then 'h x y = f (g x y)'.
+-- | Compose two functions, similar to @.@ from "Prelude".
+-- If @h = f .: g@ then @h x y = f (g x y)@.
 (.:) :: (a -> b) -> (c -> d -> a) -> c -> d -> b
 (.:) f g x y = f (g x y)
 
--- | Indicate whether to 'Continue' or 'Stop'
+-- | Indicate whether to @Continue@ or @Stop@
 -- with a given state
 data SpecState s = Continue s | Stop s
 
@@ -68,7 +83,10 @@ stop_ = stop ()
 
 -- | Conditionally continue with a given state,
 -- based on that state and additional given information.
--- Recommended use: `_loop = \handles -> continueIf f .: runStateT $ do ...`
+-- 
+-- Recommended usage:
+-- 
+-- > _loop = \handles -> continueIf f .: runStateT $ do ...
 continueIf :: Monad m => (a -> s -> Bool) -> m (a,s) -> m (SpecState s)
 continueIf f ms = do
   (a,s) <- ms
@@ -76,13 +94,19 @@ continueIf f ms = do
 
 -- | Conditionally continue statelessly,
 -- based on given information.
--- Recommended use: '_loop = \handles () -> continueIf_ f $ do ...
+-- 
+-- Recommended usage
+-- 
+-- > _loop = \handles () -> continueIf_ f $ do ...
 continueIf_ :: Monad m => (a -> Bool) -> m a -> m (SpecState ())
 continueIf_ f ms = continueIf (\a () -> f a) (liftM (\x -> (x,())) ms)
 
 -- | Conditionally continue with a given state,
 -- based solely on that state.
--- Recommended use: '_loop = \handles -> continueIf' f .: execStateT $ do ..."
+-- 
+-- Recommended usage:
+-- 
+-- > _loop = \handles -> continueIf' f .: execStateT $ do ...
 continueIf' :: Monad m => (s -> Bool) -> m s -> m (SpecState s)
 continueIf' f ms = continueIf (\() s -> f s) (liftM ((,) ()) ms)
 
@@ -106,12 +130,15 @@ instance Functor SpecState where
   fmap f (Stop s) = Stop $ f s
 
 -- | Define the specification of your networking task
--- as a begin, loop, and end proceedure.
--- 't' indicates the 'Traversable' structure used
--- ([] is recommended for simplicity, but you are at liberty
--- to use any 'Traversable' you see fit.
--- 's' indicates the type used for "state".
--- Use '()' for a stateless specification.
+-- as a begin, loop, and end proceedure. Run your NetSpec
+-- with 'runSpec'.
+-- 
+-- @t@ indicates the 'T.Traversable' structure used
+-- (@[]@ is recommended for simplicity, but you are at liberty
+-- to use any Traversable you see fit.
+-- 
+-- @s@ indicates the type used for "state".
+-- Use @()@ for a stateless specification.
 data NetSpec t s
   -- | A server must specify which ports to listen on
   = ServerSpec
@@ -131,16 +158,19 @@ data NetSpec t s
 
 
 -- | Run a 'NetSpec'.
--- Running a spec will step through your 'Traversable'
--- of connections, and replace each one with a 'Handle',
--- preserving the structure of the 'Traversable' otherwise.
--- Regardless of exceptions, all 'Handle's and 'Socket's
+-- 
+-- Running a spec will step through your 'T.Traversable'
+-- of connections, and replace each one with a 'I.Handle',
+-- preserving the structure of the Traversable otherwise.
+-- 
+-- Regardless of exceptions, all Handles and Sockets
 -- opened by the spec will be closed at the end of the run;
--- you should not need to close any of the 'Handle's given to you
+-- you should not need to close any of the Handles given to you
 -- by the spec.
+-- 
 -- During the run, it is assumed that all connections will
 -- remain open at least until they are no longer needed.
--- (Note that this calls `withSocketsDo` for you)
+-- (Note that this calls 'I.withSocketsDo' for you)
 runSpec :: Traversable t => NetSpec t s -> IO ()
 runSpec spec = withSocketsDo $ case spec of
     ServerSpec{} -> bracket a c b

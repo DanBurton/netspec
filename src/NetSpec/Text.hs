@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 
--- | Use 'Text' to send and receive messages,
--- delimited by '\n'
+-- | Use 'X.Text' to send and receive messages,
+-- delimited by @\n@
 module NetSpec.Text (
     (!)
   , send
@@ -25,9 +25,12 @@ infix 2 !
 
 class CanSend h where
   -- | The staple for sending a message.
-  -- '(!)' is typeclassed so that you can
+  -- @!@ is typeclassed so that you can
   -- 'send' or 'broadcast' using the same simple syntax.
-  -- Usage: 'destinationHandle(s) ! someText'
+  -- 
+  -- Usage:
+  -- 
+  -- > destination ! someText
   (!) :: MonadIO io => h -> Text -> io ()
 
 instance CanSend Handle where
@@ -36,14 +39,14 @@ instance CanSend Handle where
 instance (Foldable f) => CanSend (f Handle) where
   (!) = broadcast
 
--- | Send a 'Text' message to exactly one 'Handle'.
+-- | Send a 'X.Text' message to exactly one 'I.Handle'.
 send :: MonadIO io => Handle -> Text -> io ()
 send h str = liftIO $ T.hPutStrLn h str >> hFlush h
 
--- | Broadcast a 'Text' message to multiple 'Handle's.
+-- | Broadcast a 'X.Text' message to multiple 'I.Handle's.
 broadcast :: MonadIO io => Foldable f => f Handle -> Text -> io ()
 broadcast hs str = F.mapM_ (! str) hs
 
--- | Receive a 'Text' message from a 'Handle'.
+-- | Receive a 'X.Text' message from a 'I.Handle'.
 receive :: MonadIO io => Handle -> io Text
 receive = liftIO . T.hGetLine
