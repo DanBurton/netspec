@@ -170,7 +170,7 @@ data NetSpec t s = ServerSpec
 -- you should not need to close any of the Handles given to you
 -- by the spec.
 -- 
--- (Note @runSpec@ calls 'I.withSocketsDo' for you)
+-- (Note @runSpec@ calls 'N.withSocketsDo' for you)
 runSpec :: Traversable t => NetSpec t s -> IO ()
 runSpec spec = withSocketsDo $ case spec of
     ServerSpec{} -> bracket a c b
