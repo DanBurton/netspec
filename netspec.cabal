@@ -39,4 +39,9 @@ library
 
 source-repository head
   type:     git
-  location: git://github.com/DanBurton.netspec.git
+  location: git://github.com/DanBurton/netspec.git
+
+source-repository this
+  type:     git
+  location: git://github.com/DanBurton/netspec.git
+  tag:      netspec-0.1.0.0
