@@ -4,7 +4,7 @@
 -- For this module, a message is prefixed by a
 -- 64-bit little-endian signed integer, indicating the length in bytes
 -- of the remaining message, which is encoded in JSON format.
-module NetSpec.Json (
+module Network.NetSpec.Json (
   -- * Receiving
     receive
   -- * Sending
@@ -28,7 +28,7 @@ import Data.Aeson.TH (deriveJSON)
 import Data.Foldable as F (Foldable, mapM_)
 import Language.Haskell.TH (Name, Q, Dec)
 
-import qualified NetSpec.ByteString as B (send, receive)
+import qualified Network.NetSpec.ByteString as B (send, receive)
 
 -- | Derives 'A.ToJSON' and 'A.FromJSON' instances
 -- for your data types. These are necessary in order to

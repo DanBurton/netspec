@@ -1,5 +1,5 @@
 -- | Simplify static Networking tasks.
-module NetSpec (
+module Network.NetSpec (
   -- * Types and Constructors
     NetSpec (..)
   , SpecState (..)

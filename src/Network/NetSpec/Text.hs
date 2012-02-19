@@ -3,7 +3,7 @@
 -- | Use 'X.Text' to send and receive messages.
 -- For this module, a message is a single line;
 -- the newline character acts as the end-of-message flag.
-module NetSpec.Text (
+module Network.NetSpec.Text (
   -- * Receiving
     receive
   -- * Sending

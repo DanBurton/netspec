@@ -34,20 +34,22 @@ but at the same time tries to use a sensible implementation that
 can easily work with other programming languages and systems.
 
     {-# LANGUAGE OverloadedStrings #-}
-    import NetSpec.ByteString
+    import Network.NetSpec.ByteString
 
       -- or --
 
     {-# LANGUAGE OverloadedStrings #-}
-    import NetSpec.Text
+    import Network.NetSpec.Text
 
       -- or --
 
     {-# LANGUAGE TemplateHaskell #-}
-    import NetSpec.Json
+    import Network.NetSpec.Json
 
 You select whether you are a server or a client based on
 which kind of spec you run.
+
+    import Network.NetSpec
 
     main = runSpec ServerSpec { ... }
 

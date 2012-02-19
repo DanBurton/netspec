@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import NetSpec
-import NetSpec.Text
+import Network.NetSpec
+import Network.NetSpec.Text
 
 -- Notice the restrictions NetSpec places on how you can communicate.
 -- Working within NetSpec isn't well-suited for all situations;

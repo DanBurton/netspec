@@ -1,7 +1,8 @@
 -- no need for OverloadedStrings
 
-import NetSpec
-import NetSpec.Text
+import Network.NetSpec
+import Network.NetSpec.Text
+
 import System.Environment (getArgs)
 import Data.Text as T
 import Data.Text.IO as TIO

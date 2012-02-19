@@ -4,7 +4,7 @@
 -- For this module, a message is prefixed by a
 -- 64-bit little-endian signed integer, indicating the length in bytes
 -- of the remaining message.
-module NetSpec.ByteString (
+module Network.NetSpec.ByteString (
   -- * Receiving
     receive
   -- * Sending

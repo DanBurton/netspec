@@ -2,7 +2,7 @@
 
 module BlackjackData where
 
-import NetSpec.Json
+import Network.NetSpec.Json
 
 
 data Suit = Heart

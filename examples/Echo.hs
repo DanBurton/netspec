@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import NetSpec
-import NetSpec.Text
+import Network.NetSpec
+import Network.NetSpec.Text
 
 main :: IO ()
 main = runSpec ServerSpec

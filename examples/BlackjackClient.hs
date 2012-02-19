@@ -1,7 +1,7 @@
 import BlackjackData
 
-import NetSpec
-import NetSpec.Json
+import Network.NetSpec
+import Network.NetSpec.Json
 
 import Control.Monad (void)
 import Data.List (intercalate)
