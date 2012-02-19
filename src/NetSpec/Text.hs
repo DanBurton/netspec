@@ -1,12 +1,16 @@
 {-# LANGUAGE FlexibleInstances #-}
 
--- | Use 'X.Text' to send and receive messages,
--- delimited by @\n@
+-- | Use 'X.Text' to send and receive messages.
+-- For this module, a message is a single line;
+-- the newline character acts as the end-of-message flag.
 module NetSpec.Text (
-    (!)
+  -- * Receiving
+    receive
+  -- * Sending
+  , (!)
   , send
   , broadcast
-  , receive
+  -- * Re-exports
   , module I
   , module X
   , module IO
@@ -27,6 +31,13 @@ class CanSend h where
   -- | The staple for sending a message.
   -- @!@ is typeclassed so that you can
   -- 'send' or 'broadcast' using the same simple syntax.
+  -- The @CanSend@ typeclass is not exposed.
+  -- Instances of CanSend include 'I.Handle'
+  -- and @Traversable t => t Handle@.
+  -- 
+  -- @!@ produces an @IO@ action lifted into any 'IO.MonadIO',
+  -- so can be used without the extra cruft of 'IO.liftIO'
+  -- for most monad stacks. @!@ is declared as @infix 2@.
   -- 
   -- Usage:
   -- 

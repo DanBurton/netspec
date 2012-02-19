@@ -14,10 +14,12 @@ module NetSpec (
   , continue_
   , continueIf
   , continueIf'
+  , continueIf_
   , stop
   , stop_
   , stopIf
   , stopIf'
+  , stopIf_
   
   -- * Convenience
   
@@ -113,7 +115,7 @@ continueIf' f ms = continueIf (\() s -> f s) (liftM ((,) ()) ms)
 -- | Conditionally stop with a given state,
 -- based on that state and additional given information.
 stopIf :: Monad m => (a -> s -> Bool) -> m (a,s) -> m (SpecState s)
-stopIf f = continueIf (not . f)
+stopIf f = continueIf (not .: f)
 
 -- | Conditionally stop with a given state,
 -- based solely on that state.
@@ -122,7 +124,7 @@ stopIf' f = continueIf' (not . f)
 
 -- | Conditionally stop statlessly,
 -- based on given information.
-stopIf_ :: Monad m => (s -> Bool) -> m a -> m (SpecState ())
+stopIf_ :: Monad m => (a -> Bool) -> m a -> m (SpecState ())
 stopIf_ f = continueIf_ (not . f)
 
 instance Functor SpecState where
@@ -133,23 +135,23 @@ instance Functor SpecState where
 -- as a begin, loop, and end proceedure. Run your NetSpec
 -- with 'runSpec'.
 -- 
--- @t@ indicates the 'T.Traversable' structure used
--- (@[]@ is recommended for simplicity, but you are at liberty
+-- @t@ indicates the 'T.Traversable' structure used.
+-- @[]@ is recommended for simplicity, but you are at liberty
 -- to use any Traversable you see fit.
 -- 
--- @s@ indicates the type used for "state".
+-- @s@ indicates the type used for state.
 -- Use @()@ for a stateless specification.
-data NetSpec t s
-  -- | A server must specify which ports to listen on
-  = ServerSpec
+-- 
+-- A server must specify which ports to listen on,
+-- while a client instead specifies tuples of (hostname, port)
+-- to connect to.
+data NetSpec t s = ServerSpec
   { _ports  :: t PortID
   , _begin  :: t Handle -> IO s
   , _loop   :: t Handle -> s -> IO (SpecState s)
   , _end    :: t Handle -> s -> IO ()
   }
-  
-  -- | A client must specify tuples of (hostname, port) to connect to.
-  | ClientSpec
+                 | ClientSpec
   { _conns  :: t (String, PortID)
   , _begin  :: t Handle -> IO s
   , _loop   :: t Handle -> s -> IO (SpecState s)
@@ -160,7 +162,7 @@ data NetSpec t s
 -- | Run a 'NetSpec'.
 -- 
 -- Running a spec will step through your 'T.Traversable'
--- of connections, and replace each one with a 'I.Handle',
+-- of connection descriptions, and replace each one with a 'I.Handle',
 -- preserving the structure of the Traversable otherwise.
 -- 
 -- Regardless of exceptions, all Handles and Sockets
@@ -168,9 +170,7 @@ data NetSpec t s
 -- you should not need to close any of the Handles given to you
 -- by the spec.
 -- 
--- During the run, it is assumed that all connections will
--- remain open at least until they are no longer needed.
--- (Note that this calls 'I.withSocketsDo' for you)
+-- (Note @runSpec@ calls 'I.withSocketsDo' for you)
 runSpec :: Traversable t => NetSpec t s -> IO ()
 runSpec spec = withSocketsDo $ case spec of
     ServerSpec{} -> bracket a c b
