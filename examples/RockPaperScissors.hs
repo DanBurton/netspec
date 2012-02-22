@@ -2,7 +2,6 @@
 
 
 import System.Environment (getArgs)
-import System.IO
 import System.Random
 import Control.Arrow (first)
 import Data.Maybe (fromJust)
@@ -31,9 +30,21 @@ $(deriveJson id ''Result)
 data Round = Again | NoMore deriving (Eq, Read)
 $(deriveJson id ''Round)
 
+data Score = Score { wins, ties, losses :: !Int }
+           deriving Show
+$(deriveJson id ''Score)
+
+flipScore :: Score -> Score
+flipScore (Score w t l) = Score l t w
+
+newScore :: Score
+newScore = Score 0 0 0
 
 strToPort :: String -> PortID
 strToPort = PortNumber . fromIntegral . read
+
+h <!> m = do j <- m;
+             h ! j
 
 main :: IO ()
 main = do
@@ -44,29 +55,46 @@ main = do
     _ -> error "First arg must be 'server' or 'client'"
 
 
+win, lose, tie :: Monad m => StateT Score m (Result, Result)
+win  = stateT $ \(Score w t l) -> ((YouWin, YouLose), Score (w+1) t l)
+lose = stateT $ \(Score w t l) -> ((YouLose, YouWin), Score w t (l+1))
+tie  = stateT $ \(Score w t l) -> ((Tie, Tie),        Score w (t+1) l)
+
+printScore :: Score -> IO ()
+printScore = print                  
+
+
 runServer :: [String] -> IO ()
 runServer [port1,port2] = runSpec ServerSpec
   { _ports = [ strToPort port1
              , strToPort port2
              ]
-  , _begin = \_ -> return ()
-  , _loop  = \ps@[p1,p2] () -> continueIf_ (all (==Again)) $ do
+  , _begin = \_ -> return newScore
+  , _loop  = \ps@[p1,p2] -> continueIf allAgain .: runStateT $ do
        ps ! Again
        [Just c1, Just c2] <- mapM receive ps
-       let (m1, m2) = case c1 `vs` c2 of
-             GT -> (YouWin, YouLose)
-             EQ -> (Tie, Tie)
-             LT -> (YouLose, YouWin)
+       (m1, m2) <- case c1 `vs` c2 of
+             GT -> win -- (YouWin, YouLose)
+             EQ -> tie -- (Tie, Tie)
+             LT -> lose -- (YouLose, YouWin)
        p1 ! m1
        p2 ! m2
-       mapM askNextRound ps
-  , _end = \ps () -> ps ! NoMore
+       mapM (liftIO . askNextRound) ps
+  , _end = \ps@[p1,p2] s -> do
+       ps ! NoMore
+       printScore s
+       p1 ! s
+       p2 ! flipScore s
   }
   where
     askNextRound :: Handle -> IO Round
     askNextRound p = fromJust <$> receive p
+    
+    allAgain :: [Round] -> Score -> Bool
+    allAgain = const . all (== Again)
 
 runServer _ = error "Usage: RockPaperScissors server PORT1 PORT2"
+
 
 runClient :: [String] -> IO ()
 runClient (host:port:bot) = runSpec ClientSpec
@@ -76,17 +104,19 @@ runClient (host:port:bot) = runSpec ClientSpec
        Just m <- receive h
        case m of
          Again -> do
-           myMove <- getMove
-           h ! myMove
+           h <!> getMove
            Just r <- receive h
            putResult r
            again <- getAgain
            h ! again
            case again of
              Again  -> continue_
-             NoMore -> stop_
+             NoMore -> receive h >>= (\(Just NoMore) -> stop_)
          NoMore -> putServerEnd >> stop_
-  , _end = \_ () -> putEnd
+  , _end = \[h] () -> do
+       Just s <- receive h
+       printScore s
+       putEnd
   }
   where
     putBegin = putStrLn "Let's play some Rock Paper Scissors!"
