@@ -79,7 +79,7 @@ runServer [port1,port2] = runSpec ServerSpec
              LT -> lose -- (YouLose, YouWin)
        p1 ! m1
        p2 ! m2
-       mapM (liftIO . askNextRound) ps
+       mapM askNextRound ps
   , _end = \ps@[p1,p2] s -> do
        ps ! NoMore
        printScore s
@@ -87,7 +87,7 @@ runServer [port1,port2] = runSpec ServerSpec
        p2 ! flipScore s
   }
   where
-    askNextRound :: Handle -> IO Round
+    askNextRound :: (MonadIO io, Functor io) => Handle -> io Round
     askNextRound p = fromJust <$> receive p
     
     allAgain :: [Round] -> Score -> Bool
