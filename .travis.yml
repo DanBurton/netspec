@@ -1,0 +1,21 @@
+# see: https://github.com/commercialhaskell/stack/blob/master/doc/GUIDE.md#travis-with-caching
+
+sudo: false
+language: c
+
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+
+install:
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+- stack --no-terminal setup
+
+script: stack --no-terminal test
+
+cache:
+  directories:
+  - $HOME/.stack
