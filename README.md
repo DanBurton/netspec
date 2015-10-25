@@ -1,3 +1,5 @@
+![travis build status](https://travis-ci.org/DanBurton/netspec.svg?branch=master)
+
 #NetSpec
 **A Haskell library to simplify static Networking tasks**
 
