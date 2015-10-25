@@ -1,5 +1,5 @@
 name:                netspec
-version:             0.2.0.0
+version:             0.2.1.0
 synopsis:            Simplify static Networking tasks
 
 homepage:            http://github.com/DanBurton/netspec
@@ -22,6 +22,10 @@ build-type:          Simple
 stability:           experimental
 cabal-version:       >=1.8
 
+extra-source-files:
+    README.md
+  , examples/*.hs
+
 library
   exposed-modules:
     Network.NetSpec,
@@ -29,22 +33,23 @@ library
     Network.NetSpec.Text,
     Network.NetSpec.ByteString
   build-depends:
-    base >= 4 && < 4.6,
-    aeson == 0.6.*,
-    network == 2.3.*,
-    mtl == 2.0.*,
-    template-haskell == 2.7.*,
-    transformers == 0.2.*,
-    text == 0.11.*,
-    binary == 0.5.*,
-    bytestring == 0.9.*
+    base >= 4 && < 4.9,
+    aeson >= 0.9 && < 0.10,
+    network >= 2.3 && < 2.7,
+    mtl >= 2.0 && < 2.3,
+    template-haskell >= 2.7 && < 2.11,
+    transformers >= 0.2 && < 0.5,
+    text >= 0.11 && < 1.3,
+    binary >= 0.5 && < 0.8,
+    bytestring >= 0.9 && < 0.11
   hs-source-dirs: src
+
+test-suite blackjack-test
+  hs-source-dirs: examples, test
+  main-is: Main.hs
+  type: exitcode-stdio-1.0
+  build-depends: base, netspec, random-shuffle, async
 
 source-repository head
   type:     git
   location: git://github.com/DanBurton/netspec.git
-
-source-repository this
-  type:     git
-  location: git://github.com/DanBurton/netspec.git
-  tag:      netspec-0.2.0.0

@@ -94,7 +94,7 @@ To run the Relay example, open 3 terminals:
 Type things into terminal 1, and watch as they are relayed to terminal 2.
 You can run the Chat example in much the same way. These examples illustrate
 a stateless server, using `Text` messages. The termination string `"bye\r"`
-has that retarded `\r` because that's what telnet sends. Remember, `Text`
+has that dumb `\r` because that's what telnet sends. Remember, `Text`
 uses only `\n` as the end-of-message sentinel, so it is up to you to handle
 `\r` if you are dealing with outside programs that send it. (NetSpec does not).
 

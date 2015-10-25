@@ -1,3 +1,5 @@
+module BlackjackServer where
+
 import BlackjackData
 
 import Network.NetSpec

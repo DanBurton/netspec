@@ -24,7 +24,7 @@ import System.IO as I (Handle)
 import Control.Monad.IO.Class as IO (MonadIO, liftIO)
 import Control.Applicative ((<$>))
 import Data.Aeson (encode, decode)
-import Data.Aeson.TH (deriveJSON)
+import Data.Aeson.TH (deriveJSON, defaultOptions, fieldLabelModifier)
 import Data.Foldable as F (Foldable, mapM_)
 import Language.Haskell.TH (Name, Q, Dec)
 
@@ -45,7 +45,8 @@ import qualified Network.NetSpec.ByteString as B (send, receive)
 -- 
 -- Alteratively, you could write your own instances.
 deriveJson :: (String -> String) -> Name -> Q [Dec]
-deriveJson = deriveJSON
+deriveJson transformFieldNames = deriveJSON defaultOptions
+  { fieldLabelModifier = transformFieldNames}
 
 
 class CanSendJson h where

@@ -1,0 +1,6 @@
+resolver: lts-3.11
+packages:
+- '.'
+extra-deps:
+- aeson-0.9.0.1
+- attoparsec-0.13.0.1
